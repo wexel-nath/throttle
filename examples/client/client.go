@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"throttle"
 	"time"
 	"sync"
+
+	"github.com/wexel-nath/throttle"
 )
 
 const (
@@ -29,7 +30,7 @@ func main() {
 
 	// start workers
 	for i := 1; i <= numWorkers; i++ {
-		time.Sleep(100 * time.Millisecond) // stagger workers
+		time.Sleep(50 * time.Millisecond) // stagger workers
 		wg.Add(1)
 		go worker(i)
 	}
@@ -46,13 +47,10 @@ func createJobs() {
 }
 
 func worker(workerID int) {
-	throttler := throttle.NewThrottler(throttle.Config{
-		InitialSleep: 500 * time.Millisecond,
-		MinSleep:     250 * time.Millisecond,
-	}) // use the defaults
+	throttler := throttle.NewThrottler(throttle.Config{}) // use the defaults
 
 	for job := range jobs {
-		throttler.Wait()
+		time.Sleep(throttler.Duration())
 		fmt.Printf("Worker: %d processing job: %d\n", workerID, job.ID)
 
 		request, err := http.NewRequest("GET", url, nil)

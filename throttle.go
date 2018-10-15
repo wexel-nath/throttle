@@ -3,10 +3,11 @@ package throttle
 import "time"
 
 const (
-	defaultInitialSleep = 100 * time.Millisecond
-	defaultMinSleep     = time.Duration(0)
-	defaultMaxSleep     = 10 * time.Second
-	defaultModifier     = float64(1.2)
+	defaultInitialSleep     = 100 * time.Millisecond
+	defaultMinSleep         = time.Duration(0)
+	defaultMaxSleep         = 10 * time.Second
+	defaultIncreaseModifier = float64(1.2)
+	defaultDecreaseModifier = float64(0.8)
 )
 
 type Config struct {
@@ -37,10 +38,10 @@ func NewThrottler(config Config) *Throttler {
 	maxSleep := defaultMaxSleep
 	if config.MaxSleep > 0 { maxSleep = config.MaxSleep }
 
-	increaseModifier := defaultModifier
+	increaseModifier := defaultIncreaseModifier
 	if config.IncreaseModifier > 0 { increaseModifier = config.IncreaseModifier }
 
-	decreaseModifier := defaultModifier
+	decreaseModifier := defaultDecreaseModifier
 	if config.DecreaseModifier > 0 { decreaseModifier = config.DecreaseModifier }
 
 	return &Throttler{
@@ -54,28 +55,29 @@ func NewThrottler(config Config) *Throttler {
 
 // Increase the currentSleep duration by the increaseModifier percentage.
 // currentSleep cannot be higher than maxSleep
-func (t *Throttler) Increase() {
+func (t *Throttler) Increase() time.Duration {
 	sleep := time.Duration(float64(t.currentSleep) * t.increaseModifier)
 	if sleep > t.maxSleep {
 		t.currentSleep = t.maxSleep
 	} else {
 		t.currentSleep = sleep
 	}
+	return t.currentSleep
 }
 
 // Decrease the currentSleep duration by the decreaseModifier percentage.
 // currentSleep cannot be lower than minSleep
-func (t *Throttler) Decrease() {
-	sleep := time.Duration(float64(t.currentSleep) / t.decreaseModifier)
+func (t *Throttler) Decrease() time.Duration {
+	sleep := time.Duration(float64(t.currentSleep) * t.decreaseModifier)
 	if sleep < t.minSleep {
 		t.currentSleep = t.minSleep
 	} else {
 		t.currentSleep = sleep
 	}
+	return t.currentSleep
 }
 
-// Wait sleeps and returns the sleep duration.
-func (t *Throttler) Wait() time.Duration {
-	time.Sleep(t.currentSleep)
+// Duration returns the currentSleep duration.
+func (t *Throttler) Duration() time.Duration {
 	return t.currentSleep
 }
