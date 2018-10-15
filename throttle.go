@@ -4,7 +4,7 @@ import "time"
 
 const (
 	defaultInitialSleep     = 100 * time.Millisecond
-	defaultMinSleep         = time.Duration(0)
+	defaultMinSleep         = 10 * time.Millisecond
 	defaultMaxSleep         = 10 * time.Second
 	defaultIncreaseModifier = float64(1.2)
 	defaultDecreaseModifier = float64(0.8)
@@ -74,6 +74,12 @@ func (t *Throttler) Decrease() time.Duration {
 	} else {
 		t.currentSleep = sleep
 	}
+	return t.currentSleep
+}
+
+// Reset currentSleep to the minSleep duration
+func (t *Throttler) Reset() time.Duration {
+	t.currentSleep = t.minSleep
 	return t.currentSleep
 }
 
