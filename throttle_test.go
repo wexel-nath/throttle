@@ -106,6 +106,7 @@ func TestThrottler_Increase(t *testing.T) {
 
 			got := throttler.Increase()
 			assert.Equal(st, test.want, got)
+			assert.Equal(st, test.want, throttler.Duration())
 		})
 	}
 }
@@ -151,6 +152,38 @@ func TestThrottler_Decrease(t *testing.T) {
 
 			got := throttler.Decrease()
 			assert.Equal(st, test.want, got)
+			assert.Equal(st, test.want, throttler.Duration())
+		})
+	}
+}
+
+func TestThrottler_Reset(t *testing.T) {
+	tests := []struct {
+		name string
+		min  time.Duration
+		want time.Duration
+	}{
+		{
+			name: "Default Configs",
+			min:  defaultMinSleep,
+			want: 10 * time.Millisecond,
+		},
+		{
+			name: "1s MinSleep",
+			min:  1 * time.Second,
+			want: 1 * time.Second,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(st *testing.T) {
+			throttler := NewThrottler(Config{
+				MinSleep: test.min,
+			})
+
+			got := throttler.Reset()
+			assert.Equal(st, test.want, got)
+			assert.Equal(st, test.want, throttler.Duration())
 		})
 	}
 }
