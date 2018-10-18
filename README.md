@@ -1,4 +1,4 @@
-# throttle
+# throttle [![Build Status](https://travis-ci.com/wexel-nath/throttle.svg?branch=master)](https://travis-ci.com/wexel-nath/throttle)
 A simple package to dynamically throttle outgoing http requests
 
 # Installation
