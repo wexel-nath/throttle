@@ -1,4 +1,4 @@
-languauge: go
+language: go
 go:
   - master
 
